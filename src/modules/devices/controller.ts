@@ -7,7 +7,7 @@ export class DeviceController {
   async register(req: Request, res: Response) {
     try {
       const { userId, publicKey, deviceName } = req.body;
-      const result = this.deviceService.registerDevice({
+      const result =await this.deviceService.registerDevice({
         userId,
         publicKey,
         deviceName,

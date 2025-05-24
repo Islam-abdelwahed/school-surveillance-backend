@@ -1,4 +1,4 @@
-import mongoose, { connect } from "mongoose";
+import mongoose from "mongoose";
 import { logger } from "../utils/logger";
 import { env } from "./env";
 
@@ -25,26 +25,26 @@ const dbConfig: DatabaseConnection = {
       process.exit(1);
     }
   },
-  disconnect: async()=>{
+  disconnect: async () => {
     try {
-        await mongoose.disconnect();
-        logger.info("Database connection closed");
+      await mongoose.disconnect();
+      logger.info("Database connection closed");
     } catch (error) {
-        logger.info("Database disconnection failed");
+      logger.info("Database disconnection failed");
     }
-  }
+  },
 };
 
-mongoose.connection.on('connected', () => {
-    logger.info('Mongoose connected to DB');
-  });
-  
-  mongoose.connection.on('error', (error) => {
-    logger.error('Mongoose connection error:', error);
-  });
-  
-  mongoose.connection.on('disconnected', () => {
-    logger.warn('Mongoose disconnected from DB');
-  });
+mongoose.connection.on("connected", () => {
+  logger.info("Mongoose connected to DB");
+});
+
+mongoose.connection.on("error", (error) => {
+  logger.error("Mongoose connection error:", error);
+});
+
+mongoose.connection.on("disconnected", () => {
+  logger.warn("Mongoose disconnected from DB");
+});
 
 export default dbConfig;

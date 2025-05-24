@@ -1,22 +1,23 @@
 import { Types } from "mongoose";
-import { VideoModel } from "./model";
+import { IVideoModel } from "./model";
 import path from "path";
 import fs from "fs";
-import { FileStorageService } from "../../core/storage/storage";
+import { IStorageService } from "../../core/storage/storage";
 import { v4 as uuidv4 } from "uuid";
+import { logger } from "../../utils/logger";
 
-interface videoDTO {
-  camera_id: string;
-  file_path: string;
-  timestamps: Date;
-  model_used: Types.ObjectId;
-  status: string;
+export interface IVideoService {
+  getAllVideos(): Promise<any>;
+  findVideoById(id: string): Promise<any>;
+  deleteVideoById(id: string): Promise<void>;
+  getVideoStream(id: string, range?: string): Promise<any>;
+  processVideoUpload(file: Express.Multer.File): Promise<any>;
 }
 
-export class VideoService {
+export class VideoService implements IVideoService {
   constructor(
-    private readonly videoModel: typeof VideoModel,
-    private readonly fileStorageService: FileStorageService
+    private readonly videoModel: IVideoModel,
+    private readonly fileStorageService: IStorageService
   ) {}
 
   async getExpiredVideos(query: { expires_at?: object }) {
@@ -49,8 +50,7 @@ export class VideoService {
     if (!video) {
       throw new Error("Video isn't found");
     }
-    const { _id, file_path } = video;
-    return { id: _id, file_path };
+    await this.fileStorageService.deleteFile(video.file_path);
   }
 
   async getVideoStream(videoId: string, range?: string) {
@@ -80,28 +80,27 @@ export class VideoService {
     const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
 
     const chunkSize = end - start + 1;
-
+    logger.warn("range");
     return {
       headers: {
         "Content-Range": `bytes ${start}-${end}/${fileSize}`,
         "Accept-Range": "bytes",
         "Content-Length": chunkSize,
         "Content-Type": "video/mp4",
-        "HTTP/1.1": "206 Partial Content",
       },
       stream: fs.createReadStream(videoPath, { start, end }),
       fileSize: chunkSize,
     };
   }
 
-  async processVideoUpload(file: any, attrs: {}) {
+  async processVideoUpload(file: Express.Multer.File) {
     try {
       const availableSpace = await this.fileStorageService.getAvailableSpace();
       if (availableSpace < file.size) {
         throw new Error("No available space");
       }
 
-      const fileExt = path.extname(file.orginalname);
+      const fileExt = path.extname(file.originalname);
       const filename = `${uuidv4()}${fileExt}`;
 
       const filePath = await this.fileStorageService.saveFile(
@@ -112,9 +111,9 @@ export class VideoService {
       const video = this.videoModel.build({
         file_path: filePath,
         timestamps: new Date(),
-        camera_id: "",
-        model_used: new Types.ObjectId("s"),
-        status: "",
+        camera_id: "32",
+        model_used: new Types.ObjectId(),
+        status: "active",
       });
       await video.save();
       const { camera_id, file_path, timestamps, model_used, status } = video;
@@ -126,6 +125,9 @@ export class VideoService {
         model_used,
         status,
       };
-    } catch (error) {}
+    } catch (error: any) {
+      logger.error("error here");
+      throw new Error(error.message);
+    }
   }
 }

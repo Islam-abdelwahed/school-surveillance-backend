@@ -12,7 +12,6 @@ export interface RedisConfig extends RedisOptions {
 export const redisConfig: RedisConfig = {
   host: env.REDIS_HOST,
   port: env.REDIS_PORT,
-  password: undefined,
   enableReadyCheck: false,
   maxRetriesPerRequest: null,
 };

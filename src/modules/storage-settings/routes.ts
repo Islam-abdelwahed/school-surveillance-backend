@@ -1,25 +1,25 @@
 import { Router } from "express";
 import { StorageController } from "./controller";
 
-const storageRoutes = (storageController: StorageController) => {
+export const storageRoutes = (storageController: StorageController) => {
   const router = Router();
 
   router
-    .route("/config")
+    .route("/")
     .get(storageController.getFullConfig.bind(this))
     .patch(storageController.partialUpdateConfig.bind(this));
 
 
   router.patch(
-    "/config/cleanup/enable",
+    "//cleanup/enable",
     storageController.toggleCleanup.bind(this)
   );
   router.patch(
-    "/config/retention",
+    "//retention",
     storageController.updateRetention.bind(this)
   );
   router.patch(
-    "/config/storage-path",
+    "//storage-path",
     storageController.updateStoragePath.bind(this)
   );
 

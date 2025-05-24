@@ -1,8 +1,8 @@
-import { StorageConfigService } from "./service";
+import { StorageService } from "./service";
 import { Request, Response, NextFunction } from "express";
 
 export class StorageController {
-  constructor(private readonly storageConfigService: StorageConfigService) {}
+  constructor(private readonly storageConfigService: StorageService) {}
 
   async getFullConfig(req: Request, res: Response, next: NextFunction) {
     try {

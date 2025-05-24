@@ -3,6 +3,8 @@ import { DeviceService } from "../devices/service";
 import { CryptoUtils } from "../../utils/crypto";
 import { LoginParams, RegisterParams } from "./types";
 import { JWTUtils } from "../../utils/JWTUtils";
+import { logger } from "../../utils/logger";
+import { log } from "console";
 
 export class AuthService {
   constructor(
@@ -14,11 +16,12 @@ export class AuthService {
   async registerUser(params: RegisterParams) {
     // 1. Check existing user
     const existingUser = await this.userService.findByEmail(params.email);
+
     if (existingUser) throw new Error("USER_ALREADY_EXISTS");
 
     // 2. Hash password
     const passwordHash = await CryptoUtils.hashPassword(params.password);
-
+    logger.warn("hash", passwordHash);
     // 3. Create user
     const user = await this.userService.createUser({
       username: params.username,
@@ -43,35 +46,36 @@ export class AuthService {
   }
 
   async loginWithDevice(params: LoginParams) {
-  // // 1. Check existing user
-  //   const existingUser = await this.userService.findByEmail(params.email);
-  //   if (!existingUser) throw new Error("USER_NOT_EXISTS");
+    try {
+      const existingUser = await this.userService.findByEmail(params.email);
 
-  //   // 2. Hash password
-  //   const passwordHash = await CryptoUtils.hashPassword(params.password);
+      if (!existingUser) throw new Error("USER_NOT_EXISTS");
 
-  //   if(passwordHash!==existingUser.password)
-  //   {
-  //     throw new Error("INCORRECT_PASSWORD");
-  //   }
-  //   // 3. Create user
-  //   const user = await this.userService.createUser({
-  //     username: params.username,
-  //     email: params.email,
-  //     passwordHash,
-  //   });
+      const isMatched = await CryptoUtils.comparePassword(
+        params.password,
+        existingUser.password
+      );
 
-  //   // 4. Register device
-  //   if(params.device.name){
-        
-  //   }
+      if (!isMatched) throw new Error("INCORRECT_PASSWORD");
 
-  //   // 5. Generate tokens
-  //   return {
-  //     userId: user.id,
-  //     deviceId: device.id,
-  //     accessToken: this.jwt.generateAccessToken(user.id),
-  //     refreshToken: this.jwt.generateRefreshToken(user.id, device.id),
-  //   };
+      const device = await this.deviceService.getDevice(params.deviceId);
+
+      if (device.is_revoked) throw new Error("DEVICE IS REVOKED");
+
+      return {
+        device: {
+          id: device.id,
+          name: device.name,
+          publicKey: device.public_key,
+        },
+        accessToken: this.jwt.generateAccessToken(existingUser.id),
+        refreshToken: this.jwt.generateRefreshToken(
+          existingUser.id,
+          device.id.toString()
+        ),
+      };
+    } catch (error: any) {
+      throw new Error(`Failed to login: ${error.message}`);
+    }
   }
 }

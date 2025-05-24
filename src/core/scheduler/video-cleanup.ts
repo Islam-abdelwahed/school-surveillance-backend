@@ -3,7 +3,7 @@ import { redisConfig } from "../../config/redis";
 import { logger } from "../../utils/logger";
 import { FileStorageService } from "../storage/storage";
 import dbConfig from "../../config/db";
-import { StorageConfigService } from "../../modules/storage/service";
+import { StorageService } from "../../modules/storage-settings/service";
 import { VideoService } from "../../modules/video/service";
 
 type CleanupJobData = {
@@ -15,7 +15,7 @@ export class VideoCleanupService {
   constructor(
     private readonly queue: Queue<CleanupJobData>,
     private readonly fileStorageService: FileStorageService,
-    private readonly storageConfigService: StorageConfigService,
+    private readonly storageConfigService: StorageService,
     private isShuttingDown = false,
     private readonly videoService: VideoService,
     private readonly worker: Worker<CleanupJobData>

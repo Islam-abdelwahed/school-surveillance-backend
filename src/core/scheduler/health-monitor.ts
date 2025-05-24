@@ -1,7 +1,7 @@
 import { Queue, Job, Worker } from "bullmq";
 import { redisConfig } from "../../config/redis";
 import { logger } from "../../utils/logger";
-import { StorageConfigService } from "../../modules/storage/service";
+import { StorageService } from "../../modules/storage-settings/service";
 import si from "systeminformation";
 
 type StorageJobData = {
@@ -13,7 +13,7 @@ export class StorageMonitorService {
     private queue: Queue<StorageJobData>,
     private worker: Worker<StorageJobData>,
     private isShuttingDown = false,
-    private readonly storageConfigService: StorageConfigService,
+    private readonly storageConfigService: StorageService,
     private readonly STORAGE_THRESHOLD = 0.9
   ) {
     this.queue = new Queue<StorageJobData>("storage-monitor", {

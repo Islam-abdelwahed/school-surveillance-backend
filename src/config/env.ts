@@ -1,7 +1,7 @@
 import { z } from "zod";
-
+ 
 const schema = z.object({
-  DATABASE_URI: z.string().min(1).includes("mongodb://"),
+  DATABASE_URI: z.string().min(1).includes("mongodb+srv://"),
   DATABASE_NAME: z.string().min(3),
 
   REDIS_HOST: z.string().min(9).default("localhost"),

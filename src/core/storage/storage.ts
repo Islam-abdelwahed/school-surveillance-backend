@@ -5,10 +5,12 @@ import fs from "fs/promises";
 export interface IStorageService {
   deleteFile(path: string): Promise<void>;
   fileExists(path: string): Promise<boolean>;
+  saveFile(fileName: string, buffer: Buffer): Promise<string>;
+  getAvailableSpace(): Promise<number>;
 }
 
 export class FileStorageService implements IStorageService {
-  constructor(private readonly basePath = "/") {}
+  constructor(private readonly basePath = "/videos") {}
 
   async deleteFile(filePath: string): Promise<void> {
     const absolutePath = path.resolve(this.basePath, filePath);

@@ -1,4 +1,4 @@
-import mongoose, { Schema, Types } from "mongoose";
+import mongoose, { Schema, Types, Model, Document } from "mongoose";
 
 interface VideoAttrs {
   camera_id: string;
@@ -8,13 +8,13 @@ interface VideoAttrs {
   status: string;
 }
 
-interface Model extends mongoose.Model<VideoDocument> {
-  build(attrs: VideoAttrs): VideoDocument;
+export interface VideoDocument extends VideoAttrs, Document {
+  _id: string;
+  createAt: Date;
 }
 
-interface VideoDocument extends VideoAttrs, mongoose.Document {
-  _id: string;
-  createAt:Date;
+export interface IVideoModel extends Model<VideoDocument> {
+  build(attrs: VideoAttrs): VideoDocument;
 }
 
 const VideoSchema = new Schema({
@@ -29,7 +29,9 @@ VideoSchema.statics.build = (attrs: VideoAttrs) => {
   return new VideoModel(attrs);
 };
 
-export const VideoModel = mongoose.model<VideoDocument, Model>(
+const VideoModel = mongoose.model<VideoDocument, IVideoModel>(
   "video",
   VideoSchema
 );
+
+export default VideoModel;

@@ -8,11 +8,7 @@ export interface RegisterParams {
     };
   }
 export interface LoginParams {
-    username: string;
     email: string;
     password: string;
-    device: {
-      name: string;
-      publicKey: string;
-    };
+    deviceId: string;
   }

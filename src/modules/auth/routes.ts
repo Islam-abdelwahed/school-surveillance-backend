@@ -1,33 +1,30 @@
 import express from "express";
 import { AuthController } from "./controller";
 import { requestValidation } from "../../middleware/validation";
-import { registerSchema ,loginSchema } from './schemas';
+import { registerSchema, loginSchema } from "./schemas";
 
 export const authRoutes = (authController: AuthController) => {
   const router = express.Router();
 
   router.post(
-    "/auth/signup",
+    "/signup",
     requestValidation(registerSchema),
     authController.signup.bind(authController)
   );
 
   router.post(
-    "/auth/login",
+    "/login",
     requestValidation(loginSchema),
     authController.login.bind(authController)
   );
 
   router.get(
-    "/auth/logout",
-    
+    "/logout",
+
     authController.logout.bind(authController)
   );
 
-  router.post(
-    "/auth/refresh",
-    authController.refresh.bind(authController)
-  );
+  router.post("/refresh", authController.refresh.bind(authController));
 
   return router;
 };

@@ -1,25 +1,20 @@
 import { NextFunction, Request, Response } from "express";
-import { VideoService } from "./service";
-import { FileStorageService } from "../../core/storage/storage";
+import { IVideoService } from "./service";
 
 export class VideoController {
-  constructor(
-    private readonly videoSrevice: VideoService,
-    private readonly fileStorageService: FileStorageService
-  ) {}
+  constructor(private readonly videoService: IVideoService) {}
 
   async getVideo(req: Request, res: Response, next: NextFunction) {
     try {
-      const video = await this.videoSrevice.findVideoById(req.params.id);
+      const video = await this.videoService.findVideoById(req.params.id);
       res.status(200).json({ ...video });
     } catch (error) {
-      next(error);
+      res.status(400).json({ msg: "VIDEO NOT FOUND" });
     }
   }
   async deleteVideo(req: Request, res: Response, next: NextFunction) {
     try {
-      const video = await this.videoSrevice.deleteVideoById(req.params.id);
-      await this.fileStorageService.deleteFile(video.file_path);
+      await this.videoService.deleteVideoById(req.params.id);
       res.status(204).json({ message: "Video Deleted Successfully" });
     } catch (error) {
       next(error);
@@ -28,7 +23,7 @@ export class VideoController {
 
   async getVideos(req: Request, res: Response, next: NextFunction) {
     try {
-      const videos = await this.videoSrevice.getAllVideos();
+      const videos = await this.videoService.getAllVideos();
       res.status(200).json({ ...videos });
     } catch (error) {
       next(error);
@@ -37,8 +32,8 @@ export class VideoController {
 
   async streamVideo(req: Request, res: Response, next: NextFunction) {
     try {
-      const range = req.headers.range;
-      const { headers, stream } = await this.videoSrevice.getVideoStream(
+      const range = req.headers["content-range"];
+      const { headers, stream } = await this.videoService.getVideoStream(
         req.params.id,
         range
       );
@@ -51,14 +46,12 @@ export class VideoController {
 
   async storeVideo(req: Request, res: Response, next: NextFunction) {
     try {
-      const video = await this.videoSrevice.processVideoUpload(
-       req.file,{
-          description: req.body.description,
-          detectionData: req.body.detectionData,
-        },
-      );
-    } catch (error) {
-      next(error);
+      const video = await this.videoService.processVideoUpload(req.file!);
+
+      res.status(202).json({ msg: "VIDEO UPLOADED", video });
+    } catch (error: any) {
+      // next(error);
+      res.status(400).json({ msg: `VIDEO NOT UPLOADED: ${error.message}` });
     }
   }
 }

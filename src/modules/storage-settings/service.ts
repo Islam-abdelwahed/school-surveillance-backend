@@ -1,7 +1,7 @@
 import StorageConfigModel from "./models/storage.config.model";
 import StorageStatusModel from "./models/storage.status.model";
 
-export class StorageConfigService {
+export class StorageService {
   constructor(
     private storageConfigModel: typeof StorageConfigModel,
     private storageStatusModel: typeof StorageStatusModel

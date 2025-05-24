@@ -1,9 +1,9 @@
 import { Types } from "mongoose";
-import { DeviceModel } from "./model";
+import DeviceModel, { IDeviceModel } from "./model";
 import { DeviceDTO } from "./types";
 
 export class DeviceService {
-  constructor(private deviceModel: typeof DeviceModel) {}
+  constructor(private deviceModel: IDeviceModel) {}
 
   private readonly publicKeyRegex =
     /^-----BEGIN PUBLIC KEY-----[\s\S]+-----END PUBLIC KEY-----$/;
@@ -26,6 +26,7 @@ export class DeviceService {
 
       const newDevice = this.deviceModel.build({
         user_id: new Types.ObjectId(userId),
+        name: deviceName,
         is_revoked: false,
         public_key: publicKey,
         last_active: new Date(),
@@ -37,8 +38,8 @@ export class DeviceService {
         public_key: newDevice.public_key,
         last_active: newDevice.last_active,
       };
-    } catch (error) {
-      throw new Error(`Failed to register device: `);
+    } catch (error: any) {
+      throw new Error(`Failed to register device: ${error.message}`);
     }
   }
 
@@ -55,8 +56,23 @@ export class DeviceService {
         ...device.toObject(),
         id: device._id.toString(), // convert ObjectId to string
       }));
+    } catch (error: any) {
+      throw new Error(`Failed to register device: ${error.message}`);
+    }
+  }
+
+  async getDevice(deviceId: string) {
+    try {
+      const device = await this.deviceModel.findById(deviceId);
+
+      if (!device) throw new Error("No DEVICE FOUND");
+
+      const { _id, name, is_revoked, public_key, last_active } = device;
+
+      return { id: _id, name, is_revoked, public_key, last_active };
+      
     } catch (error) {
-      throw new Error(`Failed to register device: `);
+      throw new Error("No DEVICE FOUND");
     }
   }
 }
