@@ -32,8 +32,17 @@ export class UserService {
     try {
       const user = await this.userModel.findById(userId);
       if (!user) throw new Error("USER NOT FOUND");
-      const { _id, username, email_hash, password } = user;
-      return { id: _id, username, email_hash, password };
+      const { _id, username, email_hash, password, schoolName, phone, role } =
+        user;
+      return {
+        id: _id,
+        username,
+        email_hash,
+        password,
+        schoolName,
+        phone,
+        role,
+      };
     } catch (error: any) {
       throw new Error(error.message);
     }
@@ -48,8 +57,9 @@ export class UserService {
     user.email_hash = params.email;
     user.username = params.username;
     await user.save();
-    const { _id, username, email_hash, password } = user;
-    return { id: _id, username, email_hash, password };
+    const { _id, username, email_hash, password, role, schoolName, phone } =
+      user;
+    return { id: _id, username, email_hash, password, role, schoolName, phone };
   }
   async deleteUser(userId: string) {
     const user = await this.userModel.findByIdAndDelete(userId);

@@ -1,14 +1,14 @@
-import mongoose, { Schema, Types } from "mongoose";
+import mongoose, { Schema, Types, Model, Document } from "mongoose";
 
 interface StorageStatusAttrs {
   config: Types.ObjectId;
   total_capacity_gb: Number;
   used_space_gb: Number;
   usage_Percentage: number;
-  last_check: Date;
+  last_check?: Date;
 }
 
-interface StorageDocument extends StorageStatusAttrs, mongoose.Document {
+export interface StorageStatusDocument extends StorageStatusAttrs, Document {
   _id: string;
   storage_config: {
     storage_path: string;
@@ -21,8 +21,8 @@ interface StorageDocument extends StorageStatusAttrs, mongoose.Document {
   createdAt: Date;
 }
 
-interface Model extends mongoose.Model<StorageDocument> {
-  build(attrs: StorageStatusAttrs): StorageDocument;
+export interface IStorageStatusModel extends Model<StorageStatusDocument> {
+  build(attrs: StorageStatusAttrs): StorageStatusDocument;
 }
 
 const StorageStatusSchema = new Schema({
@@ -33,13 +33,14 @@ const StorageStatusSchema = new Schema({
   last_check: Date,
 });
 
-const StorageStatusModel = mongoose.model<StorageDocument, Model>(
-  "storageStatus",
-  StorageStatusSchema
-);
-
 StorageStatusSchema.statics.build = (attrs: StorageStatusAttrs) => {
   return new StorageStatusModel(attrs);
 };
+
+const StorageStatusModel = mongoose.model<
+  StorageStatusDocument,
+  IStorageStatusModel
+>("storageStatus", StorageStatusSchema);
+
 
 export default StorageStatusModel;

@@ -4,16 +4,16 @@ import mongoose, { Schema, Model, Document, Types } from "mongoose";
 export interface UserAttrs {
   username: string;
   email_hash: string;
+  role?: string;
+  phone?: string;
+  schoolName?: string;
   password: string;
   last_login?: Date;
 }
 
 // Interface for User document (adds Mongo document properties)
-export interface UserDoc extends Document {
+export interface UserDoc extends Document,UserAttrs {
   _id:Types.ObjectId;
-  username: string;
-  email_hash: string;
-  password: string;
   createdAt: Date;
 }
 
@@ -25,6 +25,9 @@ export interface IUserModel extends Model<UserDoc> {
 const UserSchema = new Schema(
   {
     username: { type: String, required: true },
+    role: {type: String, enum: ['Head','Teacher'], default: "Head"},
+    phone: {type: String ,default:" "},
+    schoolNName: {type: String, default: " "},
     email_hash: { type: String, required: true, unique: true },
     password: { type: String, required: true },
   },

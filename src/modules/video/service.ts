@@ -5,6 +5,8 @@ import fs from "fs";
 import { IStorageService } from "../../core/storage/storage";
 import { v4 as uuidv4 } from "uuid";
 import { logger } from "../../utils/logger";
+import { StorageSettingsService } from "../storage-settings/service";
+import { EventBus } from "../../core/events/event-bus";
 
 export interface IVideoService {
   getAllVideos(): Promise<any>;
@@ -16,8 +18,10 @@ export interface IVideoService {
 
 export class VideoService implements IVideoService {
   constructor(
+    private readonly storageSettingsService: StorageSettingsService,
     private readonly videoModel: IVideoModel,
-    private readonly fileStorageService: IStorageService
+    private readonly fileStorageService: IStorageService,
+    private readonly eventBus: EventBus
   ) {}
 
   async getExpiredVideos(query: { expires_at?: object }) {
@@ -41,8 +45,20 @@ export class VideoService implements IVideoService {
   }
 
   async getAllVideos() {
-    const videos = await this.videoModel.find().populate("ai-model");
-    return videos;
+    const videos = await this.videoModel.find();
+    const list = videos.map((v) => {
+      return {
+        id: v._id,
+        date: v.timestamps,
+        teacher: "ljkgh",
+        student: "xljxg",
+        class: v.classroom,
+        event: v.detection,
+        level: "3",
+      };
+    });
+
+    return list;
   }
 
   async deleteVideoById(videoId: string) {
@@ -108,15 +124,32 @@ export class VideoService implements IVideoService {
         file.buffer
       );
 
+      const retentionDays =
+        await this.storageSettingsService.getRetentionDays();
+      const expires_at = new Date();
+      expires_at.setDate(expires_at.getDate() + retentionDays);
+
       const video = this.videoModel.build({
         file_path: filePath,
-        timestamps: new Date(),
+        timestamps: new Date().toISOString(),
         camera_id: "32",
+        classroom: "class-1",
+        detection: "Physical abuse",
+        caption: "A teacher is seen holding student's ear, and hitting him",
         model_used: new Types.ObjectId(),
         status: "active",
+        expires_at,
       });
+
       await video.save();
       const { camera_id, file_path, timestamps, model_used, status } = video;
+
+      await this.eventBus.publish("video_processed", {
+        userId: "123456",
+        title: video.detection,
+        message:video.caption,
+        time: video.timestamps
+      });
 
       return {
         camera_id,

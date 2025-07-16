@@ -22,7 +22,7 @@ const dbConfig: DatabaseConnection = {
       logger.info("Database connection established");
     } catch (error) {
       logger.error("Database connection Failed");
-      process.exit(1);
+      throw new Error();
     }
   },
   disconnect: async () => {

@@ -5,26 +5,25 @@ export const storageRoutes = (storageController: StorageController) => {
   const router = Router();
 
   router
-    .route("/")
-    .get(storageController.getFullConfig.bind(this))
-    .patch(storageController.partialUpdateConfig.bind(this));
+    .route("/config")
+    .get(storageController.getFullConfig.bind(storageController))
+    .patch(storageController.partialUpdateConfig.bind(storageController));
 
 
   router.patch(
-    "//cleanup/enable",
-    storageController.toggleCleanup.bind(this)
+    "/config/cleanup-toggle",
+    storageController.toggleCleanup.bind(storageController)
   );
   router.patch(
-    "//retention",
-    storageController.updateRetention.bind(this)
+    "/config/retention",
+    storageController.updateRetention.bind(storageController)
   );
   router.patch(
-    "//storage-path",
-    storageController.updateStoragePath.bind(this)
+    "/config/storage-path",
+    storageController.updateStoragePath.bind(storageController)
   );
 
-
-  router.get("/status", storageController.getStorageStatus.bind(this));
+  router.get("/status", storageController.getStorageStatus.bind(storageController));
 
   return router;
 };

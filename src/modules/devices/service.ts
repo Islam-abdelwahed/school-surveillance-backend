@@ -62,17 +62,13 @@ export class DeviceService {
   }
 
   async getDevice(deviceId: string) {
-    try {
       const device = await this.deviceModel.findById(deviceId);
 
       if (!device) throw new Error("No DEVICE FOUND");
 
       const { _id, name, is_revoked, public_key, last_active } = device;
 
-      return { id: _id, name, is_revoked, public_key, last_active };
+      return { id: _id.toString(), name, is_revoked, public_key, last_active };
       
-    } catch (error) {
-      throw new Error("No DEVICE FOUND");
-    }
   }
 }

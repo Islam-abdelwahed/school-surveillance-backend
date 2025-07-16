@@ -4,7 +4,6 @@ import { CryptoUtils } from "../../utils/crypto";
 import { LoginParams, RegisterParams } from "./types";
 import { JWTUtils } from "../../utils/JWTUtils";
 import { logger } from "../../utils/logger";
-import { log } from "console";
 
 export class AuthService {
   constructor(
@@ -40,7 +39,7 @@ export class AuthService {
     return {
       userId: user.id,
       deviceId: device.id,
-      accessToken: this.jwt.generateAccessToken(user.id),
+      accessToken: this.jwt.generateAccessToken(user.id, device.id),
       refreshToken: this.jwt.generateRefreshToken(user.id, device.id),
     };
   }
@@ -68,7 +67,7 @@ export class AuthService {
           name: device.name,
           publicKey: device.public_key,
         },
-        accessToken: this.jwt.generateAccessToken(existingUser.id),
+        accessToken: this.jwt.generateAccessToken(existingUser.id, device.id),
         refreshToken: this.jwt.generateRefreshToken(
           existingUser.id,
           device.id.toString()
@@ -77,5 +76,21 @@ export class AuthService {
     } catch (error: any) {
       throw new Error(`Failed to login: ${error.message}`);
     }
+  }
+
+  async refreshToken(refreshToken: string) {
+    const payload = this.jwt.verifyRefreshToken(refreshToken);
+    if (!payload) throw new Error("INVALID_REFRESH_TOKEN");
+
+    const device = await this.deviceService.getDevice(payload.deviceId);
+    if (device.is_revoked) throw new Error("DEVICE_IS_REVOKED");
+
+    return {
+      accessToken: this.jwt.generateAccessToken(payload.userId, device.id),
+      refreshToken: this.jwt.generateRefreshToken(
+        payload.userId,
+        device.id.toString()
+      ),
+    };
   }
 }

@@ -1,8 +1,9 @@
-import { StorageService } from "./service";
+import { StorageSettingsService } from "./service";
 import { Request, Response, NextFunction } from "express";
 
 export class StorageController {
-  constructor(private readonly storageConfigService: StorageService) {}
+
+  constructor(private readonly storageConfigService: StorageSettingsService) {}
 
   async getFullConfig(req: Request, res: Response, next: NextFunction) {
     try {
@@ -34,8 +35,8 @@ export class StorageController {
 
   async updateRetention(req: Request, res: Response, next: NextFunction) {
     try {
-      await this.storageConfigService.updateCleanupSchedule();
-      res.status(200).json({});
+      const result = await this.storageConfigService.updateVideoRetention(req.body.retention);
+      res.status(200).json({retention:result});
     } catch (error) {
       next(error);
     }
@@ -43,7 +44,8 @@ export class StorageController {
 
   async updateStoragePath(req: Request, res: Response, next: NextFunction) {
     try {
-      res.status(201).json({});
+      const result = await this.storageConfigService.updateStoragePath(req.body.path);
+      res.status(201).json({result});
     } catch (error) {
       next(error);
     }

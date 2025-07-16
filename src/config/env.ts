@@ -6,6 +6,8 @@ const schema = z.object({
 
   REDIS_HOST: z.string().min(9).default("localhost"),
   REDIS_PORT: z.coerce.number().default(6379),
+  REDIS_PASSWORD: z.string().min(3),
+  REDIS_USERNAME: z.string().min(3),
 
   JWT_SECRET: z.string().min(32),
 

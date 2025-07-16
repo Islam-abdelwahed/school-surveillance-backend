@@ -5,7 +5,7 @@ export const usersRoutes = (controller: UsersController) => {
   const router = Router();
 
   router
-    .route("/:id")
+    .route("/profile")
     .get(controller.getProfile.bind(controller))
     .patch(controller.updateProfile.bind(controller))
     .delete(controller.deleteProfile.bind(controller));

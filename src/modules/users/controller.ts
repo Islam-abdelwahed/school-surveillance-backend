@@ -6,7 +6,9 @@ export class UsersController {
 
   async getProfile(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = await this.userService.findUserById(req.params.id);
+      const user = await this.userService.findUserById(
+        req.context?.userId || ""
+      );
       res.status(200).json({ ...user });
     } catch (error) {
       res.status(400).json({ msg: "INVALID DATA" });
@@ -16,13 +18,16 @@ export class UsersController {
   async updateProfile(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, username } = req.body;
-      const user = await this.userService.updateUserData(req.params.id, {
-        email,
-        username,
-      });
+      const user = await this.userService.updateUserData(
+        req.context?.userId || "",
+        {
+          email,
+          username,
+        }
+      );
       res.status(200).json({ ...user });
-    } catch (error) {
-      res.status(400).json({ msg: "INVALID DATA" });
+    } catch (error: any) {
+      res.status(400).json({ msg: `INVALID DATA: ${error.message}` });
     }
   }
 

@@ -12,7 +12,7 @@ export interface DeviceDoc extends DeviceAttrs, Document {
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
-}
+} 
 
 export interface IDeviceModel extends Model<DeviceDoc> {
   build(attrs: DeviceAttrs): DeviceDoc;
@@ -21,7 +21,6 @@ const DeviceSchema = new Schema(
   {
     user_id: { type: Schema.Types.ObjectId, ref: "users", required: true },
     name: { type: String, required: true },
-    public_key: { type: String, required: true, unique: true },
     is_revoked: { type: Boolean, required: true },
     last_active: { type: Date, required: true },
   },
